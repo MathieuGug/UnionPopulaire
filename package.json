@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@rollup/plugin-json": "^4.1.0"
+  }
+}
