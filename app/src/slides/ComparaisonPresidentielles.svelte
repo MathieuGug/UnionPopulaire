@@ -9,7 +9,7 @@
     import { groupes_politiques_pres_2017, groupes_politiques_leg_2017, groupes_politiques_pres_2022 } from '../candidats.js';
     import { cp_circo_5 } from '../candidats.js';
 
-    export let communes, score_par_commune, pres_2017, pres_2022;
+    export let communes, bureaux, score_par_commune, pres_2017, pres_2022;
 
     let selection = getContext('communes-actives');
 
@@ -72,8 +72,7 @@
         </div>
 
         <Map {communes} 
-            candidats={candidats_pres_2017} 
-            results={pres_2017} $
+            {bureaux}
             colors={abstentionEntrePresidentielles} />
     </div>
 

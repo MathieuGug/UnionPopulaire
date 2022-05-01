@@ -14,17 +14,17 @@ export let cp_circo_5 = ['84002', '84003', '84004', '84005', '84006', '84009', '
 // Candidats
 
 export let candidats_pres_2017 = [
-    ["DUPONT-AIGNAN", {'id': 0, 'nom': 'DUPONT-AIGNAN Nicolas', color: '#960200'} ] ,
-    ["LE PEN", {'id': 1, 'nom': 'LE PEN Marine', color: '#960200'} ] ,
-    ["MACRON", {'id': 2, 'nom': 'MACRON Emmanuel', color: '#960200'} ] ,
-    ["HAMON", {'id': 3, 'nom': 'HAMON Benoît', color: '#960200'} ] ,
+    ["DUPONT-AIGNAN", {'id': 0, 'nom': 'DUPONT-AIGNAN Nicolas', color: '#4F89E1'} ] ,
+    ["LE PEN", {'id': 1, 'nom': 'LE PEN Marine', color: '#1B2CC1'} ] ,
+    ["MACRON", {'id': 2, 'nom': 'MACRON Emmanuel', color: '#EFCB68'} ] ,
+    ["HAMON", {'id': 3, 'nom': 'HAMON Benoît', color: '#EFA8B8'} ] ,
     ["ARTHAUD", {'id': 4, 'nom': 'ARTHAUD Nathalie', color: '#960200'} ] ,
-    ["POUTOU", {'id': 5, 'nom': 'POUTOU Philippe', color: '#960200'} ] ,
+    ["POUTOU", {'id': 5, 'nom': 'POUTOU Philippe', color: '#A4508B'} ] ,
     ["CHEMINADE", {'id': 6, 'nom': 'CHEMINADE Jacques', color: '#960200'} ] ,
-    ["LASSALLE", {'id': 7, 'nom': 'LASSALLE Jean', color: '#960200'} ] ,
-    ["MÉLENCHON", {'id': 8, 'nom': 'MÉLENCHON Jean-Luc', color: '#960200'} ] ,
+    ["LASSALLE", {'id': 7, 'nom': 'LASSALLE Jean', color: '#BBB09B'} ] ,
+    ["MÉLENCHON", {'id': 8, 'nom': 'MÉLENCHON Jean-Luc', color: '#5F0A87'} ] ,
     ["ASSELINEAU", {'id': 9, 'nom': 'ASSELINEAU François', color: '#960200'} ] ,
-    ["FILLON", {'id': 10, 'nom': 'FILLON François', color: '#960200'} ] 
+    ["FILLON", {'id': 10, 'nom': 'FILLON François', color: '#7AA2DF'} ] 
 ].reduce((acc , v) => ({...acc, [v[0]]: v[1]}), {});
 
 export let groupes_politiques_pres_2017 = {

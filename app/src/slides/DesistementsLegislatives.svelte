@@ -1,37 +1,21 @@
 <script>
-    import Map from '../Map.svelte';
-    import MapSelection from '../MapSelection.svelte';
-
-	import Legend from '../legend/Legend.svelte';    
     import { getContext, onMount } from 'svelte';
 
-    import { loadMap, loadResults } from '../load_data.js';
-    import { rollup, sum, max, min } from 'd3-array';
-
     import { scaleLinear, scaleSequential, scaleOrdinal } from 'd3-scale';
-    import { schemeGreys, interpolatePiYG } from 'd3-scale-chromatic';
 
+    import Map from '../Map.svelte';
+    import MapSelection from '../MapSelection.svelte';
+	import Legend from '../legend/Legend.svelte';    
+    import DesistementsParBureau from './DesistementsParBureau.svelte';
 
     import { candidats_pres_2017, candidats_leg_2017, candidats_pres_2022 } from '../candidats.js';
-    import { groupes_politiques_pres_2017, groupes_politiques_leg_2017, groupes_politiques_pres_2022 } from '../candidats.js';
 
-    export let communes, score_par_commune, pres_2017, leg_2017;
 
-    let election = "legislatives";
-
-	const paths = {
-		pres_2017: 'data/2017_pres_84_5_BV.csv',
-		leg_2017: 'data/2017_leg_84_5_BV.csv',
-		pres_2022: 'data/2022_pres_84_5_BV.csv'
-	}
-    
-    let title;
+    export let communes, bureaux, pres_2017, pres_2017_bureau, leg_2017, leg_2017_bureau;
 
     let selection = getContext('communes-actives');
 
     let display_score = "CHOTARD";
-
-    let candidats;
 
     let group_size_pres_2017 = [0, 80, 110, 150, 290, 350];
 	let group_size_leg_2017 = [0, 80, 110, 150, 290, 370];
@@ -44,32 +28,27 @@
         'THOMAS DE MALEVILLE': 'LE PEN'
     };
 
-    $: {
-        if (election == "presidentielle") {
-            candidats = candidats_pres_2017;
-        } else if (election == "legislatives") {
-            candidats = candidats_leg_2017;
-        } else {
-
-        }
-    }
-
-    console.log(candidats);
-    console.log(pres_2017);
-
-
     let colorScaleResults = scaleSequential(["blue", "red"])
         .domain([-200, 200]);
 
     // En fonction d'un CP et d'un candidat, check la perte de voix entre la présidentielle et les législatives
-    let differencePresidentielleLegislatives;
+    let differencePresidentielleLegislatives, differencePresidentielleLegislativesBureau;
 
     $: {
         differencePresidentielleLegislatives = function(cp) {
             let score_pres = pres_2017.get(cp).get(correspondance_leg_pres[display_score]).total_voix;
             let score_leg = leg_2017.get(cp).get(display_score).total_voix;
 
-            return colorScaleResults(score_pres - score_leg);
+            return score_pres - score_leg;
+        }
+    }
+
+    $: {
+        differencePresidentielleLegislativesBureau = function(id_b_vote) {
+            let score_pres = pres_2017_bureau.get(id_b_vote).get(correspondance_leg_pres[display_score]).total_voix;
+            let score_leg = leg_2017_bureau.get(id_b_vote).get(display_score).total_voix;
+
+            return score_pres - score_leg;
         }
     }
 
@@ -141,9 +120,8 @@
         {:else}
         -->
         <Map communes={communes} 
-            candidats={candidats_leg_2017} 
-            results={leg_2017}
-            colors={differencePresidentielleLegislatives} />
+            bureaux={bureaux}
+            colors={(code_commune) => colorScaleResults(differencePresidentielleLegislatives(code_commune))} />
         
     </div>
 
@@ -162,8 +140,11 @@
     </div>
 </div>
 
-<div id="desistements-legislatives-melenchon">
-
+<div id="desistements-par-bureau">
+    <DesistementsParBureau 
+        resultats={leg_2017_bureau} 
+        {bureaux} 
+        {differencePresidentielleLegislativesBureau} />
 </div>
 
 <style>

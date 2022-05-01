@@ -1,16 +1,13 @@
 <script>
     import { getContext, setContext } from "svelte";
     import { rollup, sum } from 'd3-array';
-    import { scaleLinear } from "d3-scale";
 
     import LegendGroup from './LegendGroup.svelte';
 
     import { candidats_pres_2017, candidats_leg_2017, candidats_pres_2022 } from '../candidats.js';
 
     import { groupes_politiques_pres_2017, groupes_politiques_leg_2017, groupes_politiques_pres_2022 } from '../candidats.js';
-    import { cp_circo_5 } from '../candidats.js';
     import { writable } from "svelte/store";
-    import Analysis from "../Analysis.svelte";
 
     export let resultats_election;
     export let type, group_size;
@@ -44,20 +41,18 @@
     
     function resetScores(candidats) {
         Object.keys(candidats).forEach( d => (
-            candidats[d] = {total_voix: 0}
+            candidats[d] = {total_voix: 0, color: candidats[d].color}
         ) );
 
-        candidats['abstention'] = {total_voix: 0};
-        candidats['blancs'] = {total_voix: 0};
-        candidats['nuls'] = {total_voix: 0};
+        candidats['abstention'] = {total_voix: 0, color: '#000411'};
+        candidats['blancs'] = {total_voix: 0, color: '#AEB7B3'};
+        candidats['nuls'] = {total_voix: 0, color: '#E1EFE6'};
         return candidats;
     }
     
     $: if ($selection == []) {
         $candidats = resetScores($candidats);
     }
-
-    console.log($candidats);
 
     let total_inscrits = 0;
 
