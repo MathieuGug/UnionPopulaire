@@ -1,16 +1,67 @@
 <script>
     import { rollup, sum } from 'd3-array';
+import { getContext } from 'svelte';
 
     import { cp_circo_5 } from './candidats.js';
 
     import ComparaisonPresidentielles from './slides/ComparaisonPresidentielles.svelte';
     import DesistementsLegislatives from './slides/DesistementsLegislatives.svelte';
 
-    export let communes, bureaux, res_pres_2017, res_leg_2017, res_pres_2022;
+    export let communes, bureaux, all_pres_2017, all_leg_2017, all_pres_2022;
+
+    let dpt = getContext('departement');
+    let circo = getContext('circonscription');
+
+    // Fonction pour récupérer les élements unique d'un array avec filter
+    // Utile pour récupérer les numéros des circos par département
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    }
+
+    // Les circonscriptions dans le département
+	function circosDansDepartement (dpt) { 
+        let circo_dpt = all_pres_2017
+            .filter(d => +d.code_dpt == dpt)
+            .map(d => +d.code_circ)
+            .filter(onlyUnique);
+
+        return circo_dpt;
+    }
+
+    // Les départements en région PACA
+    let dpt_paca = [4, 5, 6, 13, 83, 84];
+
+	$: circo_dpt = circosDansDepartement($dpt);
+    $: console.log($dpt);
+    $: console.log(circo_dpt);
+
+    /////////////////////////////////////////////////////
+    //  FILTRER LES DONNEES EN FONCTION DU DPT / CIRCO //
+    /////////////////////////////////////////////////////
+
+    function filtrerResultats(resultats, dpt, circo) {
+        return resultats.filter(d => (+d.code_dpt == dpt) & (+d.code_circ == circo))
+    }
+
+    $: res_pres_2017 = filtrerResultats(all_pres_2017, $dpt, $circo);
+    $: res_leg_2017 = filtrerResultats(all_leg_2017, $dpt, $circo);
+    $: res_pres_2022 = filtrerResultats(all_pres_2022, $dpt, $circo);
+
 
 	// Data blending
+    function scoreParElection (pres_2017_filtered, leg_2017_filtered, pres_2022_filtered) {
+        console.log(leg_2017_filtered);
+        return {
+            pres_2017: scoreParCommuneParElection(pres_2017_filtered),
+            leg_2017: scoreParCommuneParElection(leg_2017_filtered),
+            pres_2022: scoreParCommuneParElection(pres_2022_filtered)
+        }
+    }
+
     function scoreParCommuneParElection(resultats) {
         let resultats_cp_nom = rollup(resultats, v => ({
+            nuance: v[0].nuance,
+            nom: v[0].nom + ' ' + v[0].prenom,
             total_voix: sum(v, d => d.voix),
             total_inscrits: sum(v, d => d.votants)
         }), d => d.cp, d => d.nom);
@@ -20,6 +71,8 @@
 
     function scoreParCommuneParBureauParElection(resultats) {
         let resultats_cp_bureau_nom = rollup(resultats, v => ({
+            nuance: v[0].nuance,
+            nom: v[0].nom + ' ' + v[0].prenom,
             total_voix: sum(v, d => d.voix),
             total_inscrits: sum(v, d => d.votants)
         }), d => d.id_b_vote, d => d.nom);
@@ -27,19 +80,11 @@
         return resultats_cp_bureau_nom;
     }
 
-    function scoreParElection (res_pres_2017, res_leg_2017, res_pres_2022) {
+    function scoreParElectionParBureau (pres_2017_filtered, leg_2017_filtered, pres_2022_filtered) {
         return {
-            pres_2017: scoreParCommuneParElection(res_pres_2017),
-            leg_2017: scoreParCommuneParElection(res_leg_2017),
-            pres_2022: scoreParCommuneParElection(res_pres_2022)
-        }
-    }
-
-    function scoreParElectionParBureau (res_pres_2017, res_leg_2017, res_pres_2022) {
-        return {
-            pres_2017_bureau: scoreParCommuneParBureauParElection(res_pres_2017),
-            leg_2017_bureau: scoreParCommuneParBureauParElection(res_leg_2017),
-            pres_2022_bureau: scoreParCommuneParBureauParElection(res_pres_2022)
+            pres_2017_bureau: scoreParCommuneParBureauParElection(pres_2017_filtered),
+            leg_2017_bureau: scoreParCommuneParBureauParElection(leg_2017_filtered),
+            pres_2022_bureau: scoreParCommuneParBureauParElection(pres_2022_filtered)
         }
     }
 
@@ -55,27 +100,49 @@
         return Object.fromEntries(new Map(score_par_commune));
         };
 
-       
-    let { pres_2017, leg_2017, pres_2022 } = scoreParElection(res_pres_2017, res_leg_2017, res_pres_2022);
-    let { pres_2017_bureau, leg_2017_bureau } = scoreParElectionParBureau(res_pres_2017, res_leg_2017, res_pres_2022);
+    $: ( { pres_2017, leg_2017, pres_2022 } = scoreParElection(res_pres_2017, res_leg_2017, res_pres_2022) );
+    $: ( { pres_2017_bureau, leg_2017_bureau } = scoreParElectionParBureau(res_pres_2017, res_leg_2017, res_pres_2022) );
 
-    let score_par_commune = scoreParCommune( { pres_2017, leg_2017, pres_2022 } );
+    $: score_par_commune = scoreParCommune( { pres_2017, leg_2017, pres_2022 } );
+    /*
     console.log('Score par commune:')
-    console.log(score_par_commune);
+    $: console.log(score_par_commune);
     console.log('Pres_2017');
-    console.log(pres_2017);
+    $: console.log(pres_2017);
     console.log('Leg_2017');
-    console.log(leg_2017);
+    $: console.log(leg_2017);
     console.log('Pres_2022');
-    console.log(pres_2022);
+    $: console.log(pres_2022);
+    */
 
+    $: console.log(leg_2017)
 </script>
 
-<!-- Le taux de conviction des abstentionnistes sur les 5 dernières années -->
-<ComparaisonPresidentielles {communes} {bureaux} {score_par_commune} {pres_2017} {pres_2022} /> 
+<div class="geo-select">
+    <label for="dpt-select">Sélectionnez un département:</label>
+
+    <select name="dpt" id="dpt-select" bind:value={$dpt}>
+        <option value="">--choisissez un département--</option>
+        {#each dpt_paca as dpt}
+        <option value={dpt}>{dpt}</option>
+        {/each}
+    </select>
+
+    <label for="circo-select">Sélectionnez une circo:</label>
+
+    <select name="dpt" id="circo-select" bind:value={$circo}>
+        <option value="">--choisissez une circonscription--</option>
+        {#each circo_dpt as circ}
+        <option value={circ}>{circ}</option>
+        {/each}
+    </select>
+</div>
+
+<!-- Le taux de conviction des abstentionnistes sur les 5 dernières années 
+<ComparaisonPresidentielles {communes} {bureaux} {score_par_commune} {pres_2017} {pres_2022} /> -->
 
 <!-- Les électeurs de Mélenchon qui sont restés chez eux -->
-<DesistementsLegislatives {communes} {bureaux} {pres_2017} {pres_2017_bureau} {leg_2017} {leg_2017_bureau} />
+<DesistementsLegislatives {communes} {bureaux} {pres_2017} {pres_2017_bureau} {leg_2017} {leg_2017_bureau} /> 
 
 <style>
 

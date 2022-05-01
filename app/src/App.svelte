@@ -10,18 +10,33 @@
 
 	export let app;
 
+	// On peut sélectionner le département et la circonscription
+	let dpt = writable(84);
+	let circo = writable(5);
+
 	let selection = writable(cp_circo_5);
 	let display_score = writable('abstention');
 	
     setContext('communes-actives', selection);
 	setContext('display-score', display_score);
 	setContext('commune-hovered', writable([]));
+	setContext('departement', dpt);
+	setContext('circonscription', circo);
 
+	/*
 	const paths = {
 		pres_2017: 'data/2017_pres_84_5_BV.csv',
 		leg_2017: 'data/2017_leg_84_5_BV.csv',
 		pres_2022: 'data/2022_pres_84_5_BV.csv'
 	}
+	*/
+
+	const paths = {
+		pres_2017: 'data/2017_pres_PACA_BV.csv',
+		leg_2017: 'data/2017_leg_PACA_BV.csv',
+		pres_2022: 'data/2022_pres_PACA_BV.csv'
+	}
+
 
 	// Load results
     let map_communes = loadMap();
@@ -40,12 +55,13 @@
 
 {#await map_communes then communes}
 {#await map_bureaux then bureaux}
-{#await pres_2017 then res_pres_2017}
-{#await leg_2017 then res_leg_2017}
-{#await pres_2022 then res_pres_2022}
+{#await pres_2017 then all_pres_2017}
+{#await leg_2017 then all_leg_2017}
+{#await pres_2022 then all_pres_2022}
+
 
 <div class="app">
-	<Presentation {communes} {bureaux} {res_pres_2017} {res_leg_2017} {res_pres_2022} />
+	<Presentation {communes} {bureaux} {all_pres_2017} {all_leg_2017} {all_pres_2022} />
 </div>
 
 {/await}

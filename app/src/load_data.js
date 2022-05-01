@@ -19,6 +19,8 @@ export async function loadResults(path) {
             code_b_vote: d.code_b_vote,
             id_b_vote: d.cp + '-' + d.code_b_vote,
             nom: d.nom,
+            prenom: d.prenom,
+            nuance: d.nuance,
             voix: +d.voix,
             p_voix_ins: +d['p_voix/ins'],
             p_voix_exp: +d['p_voix/exp'],
@@ -28,7 +30,6 @@ export async function loadResults(path) {
             inscrits: +d.inscrits
         } );
     })
-    console.log(nodes);
     return nodes;
 }
 
@@ -65,6 +66,5 @@ export async function loadBureaux() {
 
         features.push(feature)
     }
-    console.log(features);
     return features;
 }
