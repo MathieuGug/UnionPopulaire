@@ -120,7 +120,8 @@
     console.log($candidats_leg_2017);
 
     // Progression de l'abstention
-    $: correspondance_leg_pres = derived(candidats_leg_2017, $candidats_leg_2017 => correspondancePresidentielleLegislative(candidats_pres_2017, $candidats_leg_2017));
+    $: correspondance_leg_pres = derived(candidats_leg_2017, 
+        $candidats_leg_2017 => correspondancePresidentielleLegislative(candidats_pres_2017, $candidats_leg_2017));
     $: console.log(correspondance_leg_pres);
 
 

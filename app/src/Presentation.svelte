@@ -125,11 +125,18 @@
         return Object.fromEntries(new Map(score_par_commune));
         };
 
-    $: ( { pres_2017, leg_2017, pres_2022 } = scoreParElection($res_pres_2017, $res_leg_2017, $res_pres_2022) );
-    $: ( { pres_2017_bureau, leg_2017_bureau } = scoreParElectionParBureau($res_pres_2017, $res_leg_2017, $res_pres_2022) );
+    $: ( { pres_2017, leg_2017, pres_2022 } = derived([res_pres_2017, res_leg_2017,res_pres_2022],
+        ([$res_pres_2017, $res_leg_2017, $res_pres_2022]) => 
+            scoreParElection($res_pres_2017, $res_leg_2017, $res_pres_2022) ) );
 
-    $: console.log(leg_2017_bureau);
-    $: score_par_commune = scoreParCommune( { pres_2017, leg_2017, pres_2022 }, circos_dpt );
+    $: ( { pres_2017_bureau, leg_2017_bureau } = derived([res_pres_2017, res_leg_2017,res_pres_2022],
+        ([$res_pres_2017, $res_leg_2017, $res_pres_2022]) => 
+            scoreParElectionParBureau($res_pres_2017, $res_leg_2017, $res_pres_2022) ) );
+
+    setContext('resultats-legislatives-2017', leg_2017_bureau);
+
+    $: console.log($leg_2017_bureau);
+    // $: score_par_commune = scoreParCommune( { pres_2017, leg_2017, pres_2022 }, circos_dpt );
     /*
     console.log('Score par commune:')
     $: console.log(score_par_commune);
@@ -174,7 +181,7 @@
 
 {#await $map_communes then communes}
 {#await $map_bureaux then bureaux}
-<DesistementsLegislatives {communes} {bureaux} {pres_2017} {pres_2017_bureau} {leg_2017} {leg_2017_bureau} />
+<DesistementsLegislatives {communes} {bureaux} {pres_2017} {pres_2017_bureau} {leg_2017} />
 {/await}
 {/await}
 

@@ -10,8 +10,8 @@
 	export let app;
 
 	// On peut sélectionner le département et la circonscription
-	let dpt = writable(84);
-	let circo = writable(5);
+	let dpt = writable(83);
+	let circo = writable(1);
 
 	setContext('commune-hovered', writable(''));
 	setContext('departement', dpt);
