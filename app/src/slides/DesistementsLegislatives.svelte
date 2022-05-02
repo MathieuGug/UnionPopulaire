@@ -239,6 +239,7 @@
         {differencePresidentielleLegislativesBureau} />
 </div>
 
+
 <style>
 #desistements-legislatives {
     display: flex;
