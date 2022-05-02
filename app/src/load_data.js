@@ -15,7 +15,7 @@ export async function loadResults(path) {
             commune: d.commune,
             cp: d.cp,
             code_b_vote: d.code_b_vote,
-            id_b_vote: d.cp + '-' + d.code_b_vote,
+            id_b_vote: d.cp + '-' + parseInt(d.code_b_vote),
             nom: d.nom,
             prenom: d.prenom,
             nuance: d.nuance,
@@ -56,7 +56,7 @@ export async function loadBureaux(codes_communes) {
         feature = {
             ville: bureau.ville,
             cp: bureau.code_postal,
-            code_bureau: bureau.code,
+            code_bureau: +bureau.code,
             code_commune: bureau.commune_code,
             id_b_vote: bureau.commune_code + "-" + parseInt(bureau.code),
             adresse: bureau.libelle + " " + bureau.voie,
