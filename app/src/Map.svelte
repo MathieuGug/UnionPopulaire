@@ -1,23 +1,16 @@
 <script>
     import { getContext } from 'svelte';
-    import { get, writable } from 'svelte/store';
 
     import BaseMap from './svelte-geo/BaseMap.svelte';
     import FeatureLayer from './svelte-geo/FeatureLayer.svelte';
 
     import { geoMercator, geoPath } from 'd3-geo';
 
-    import { rollup, sum, index } from 'd3-array';
 
-    export let communes, bureaux, colors;
+    export let communes, colors;
 
     // Bind la sélection de la carte
-    let selection = [];
-    $: console.log(selection);
-
     let selection_active = getContext('communes-actives');
-    console.log(selection_active);
-
     let selection_bureaux = getContext('bureaux-actifs');
     let hovered_selection = getContext('commune-hovered');
     let display_score = getContext('display-score');
@@ -25,9 +18,6 @@
 	let textElement;
 
 	$: textBoxWidth = textElement ? textElement.getComputedTextLength()+10 : 0;
-
-    console.log(communes);
-    console.log(bureaux);
 </script>
 
 <div class="map-container">
@@ -94,5 +84,6 @@
     .map-container {
         display: flex;
         flex-direction: column;
+        align-items: center;
 }
 </style>

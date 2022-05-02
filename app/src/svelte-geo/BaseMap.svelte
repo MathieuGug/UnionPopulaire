@@ -26,7 +26,6 @@
 <div id="svgwrapper" bind:clientWidth={width} bind:clientHeight={height}>
 	<svg 
 		on:mousemove={mousemoveHandler}
-		use:zoomer 
 		style={`background-color:${background}`}
 		>
 		<g style = {`transform:translate(${margin.left}px, ${margin.top}px)`}>

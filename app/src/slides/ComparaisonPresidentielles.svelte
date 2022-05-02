@@ -5,26 +5,29 @@
 
     import { scaleLinear, scaleSequential, scaleOrdinal } from 'd3-scale';
 
-    import { candidats_pres_2017, candidats_leg_2017, candidats_pres_2022 } from '../candidats.js';
-    import { groupes_politiques_pres_2017, groupes_politiques_leg_2017, groupes_politiques_pres_2022 } from '../candidats.js';
-    import { cp_circo_5 } from '../candidats.js';
+    import MapSelection from '../MapSelection.svelte';
 
-    export let communes, bureaux, score_par_commune, pres_2017, pres_2022;
-
-    let selection = getContext('communes-actives');
-
-    let title, display_score;
-
+    export let communes, bureaux, pres_2017, pres_2022;
+    export let candidats_pres_2017, groupes_politiques_pres_2017, candidats_pres_2022, groupes_politiques_pres_2022;
 
     let group_size_pres_2017 = [0, 80, 110, 150, 290, 350];
     let group_size_pres_2022 = [0, 80, 110, 150, 290, 370];
+
+
+    let presidentielle_2017 = getContext('presidentielle-2017');
+    let presidentielle_2017_cp = getContext('presidentielle-2017-cp');
+    let presidentielle_2017_bureau = getContext('presidentielle-2017-bureau');
+
+    let presidentielle_2022 = getContext('presidentielle-2022');
+    let presidentielle_2022_cp = getContext('presidentielle-2022-cp');
+    let presidentielle_2022_bureau = getContext('presidentielle-2022-bureau');
 
     
     let colorScaleResults = scaleSequential(["blue", "red"])
         .domain([-100, 100]);
 
     // En fonction d'un CP et d'un candidat, check la perte de voix entre la présidentielle et les législatives
-    var abstentionEntrePresidentielles = function(cp) {
+    $: abstentionEntrePresidentielles = function(cp) {
        let abstention_pres = pres_2017.get(cp).get('abstention').total_voix;
        let abstention_leg = pres_2022.get(cp).get('abstention').total_voix;
 
@@ -33,6 +36,7 @@
 
 </script>
 
+<!--
 <div class="analyse">
     <h1>Analyse des scores entre la présidentielle de 2017 et de 2022</h1>
 
@@ -53,22 +57,14 @@
     <p>Cela témoigne d'une campagne présidentielle efficace pour convaincre le peuple de gauche d'aller se déplacer, ce qui sera l'enjeu majeur pour les prochaines législatives.</p>
 
 </div>
+-->
 
 <div id="presidentielles-comparaison">
 
     <div class="map-navigation">
 
         <div class="map-widgets">
-
-            <div class="map-selection"  style="display: flex; width: 100%; flex-direction: row; align-items: stretch;">
-                <div class="select-all">
-                    <button on:click={() => $selection = cp_circo_5}>Tout sélectionner</button>
-                </div>
-    
-                <div class="reset">
-                    <button on:click={() => $selection = []}>Tout désélectionner</button>
-                </div>
-            </div>
+            <MapSelection />
         </div>
 
         <Map {communes} 
@@ -78,15 +74,17 @@
 
     <div class="resultats">
         <Legend 
-            type="pres_2017"
             group_size={group_size_pres_2017} 
+            candidats={candidats_pres_2017}
+            groupes_politiques={groupes_politiques_pres_2017}
             resultats_election={pres_2017}  />
     </div>
-
+    
     <div class="resultats">
         <Legend 
-            type="pres_2022"
             group_size={group_size_pres_2022} 
+            candidats={candidats_pres_2022}
+            groupes_politiques={groupes_politiques_pres_2022}
             resultats_election={pres_2022}  />
     </div>
     

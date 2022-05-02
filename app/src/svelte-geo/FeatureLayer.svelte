@@ -26,7 +26,6 @@
 	})
 	onMount(()=>{
 		dispatch("mount",layerName)
-		applyCurrentZoom(mapGroup)
 	})
     
     let geoPathFn;

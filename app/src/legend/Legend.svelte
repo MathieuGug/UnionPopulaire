@@ -6,7 +6,7 @@
     export let resultats_election, candidats, groupes_politiques;
     export let group_size;
 
-    // CP de la commune survolée    
+    // CP de la commune survolée
     let hovered_selection = getContext('commune-hovered');
     let selection = getContext('communes-actives');
 
@@ -26,15 +26,10 @@
         candidats['nuls'].color = '#E1EFE6';
         return candidats;
     }
-
-    console.log(candidats);
-    console.log(groupes_politiques);
-
     
     $: if ($selection == []) {
         candidats = resetScores(candidats);
     }
-    
 
     let total_inscrits = 0;
     console.log(resultats_election);
