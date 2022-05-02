@@ -3,8 +3,7 @@
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 
-	import { cp_circo_5 } from './candidats.js';
-	import { loadMap, loadBureaux, loadResults } from './load_data.js';
+	import { loadResults } from './load_data.js';
 
 	import Presentation from './Presentation.svelte';
 
@@ -14,12 +13,7 @@
 	let dpt = writable(84);
 	let circo = writable(5);
 
-	let selection = writable(cp_circo_5);
-	let display_score = writable('abstention');
-	
-    setContext('communes-actives', selection);
-	setContext('display-score', display_score);
-	setContext('commune-hovered', writable([]));
+	setContext('commune-hovered', writable(''));
 	setContext('departement', dpt);
 	setContext('circonscription', circo);
 
@@ -39,8 +33,6 @@
 
 
 	// Load results
-    let map_communes = loadMap();
-	let map_bureaux = loadBureaux();
 
     let pres_2017 = loadResults(paths.pres_2017);
     let leg_2017 = loadResults(paths.leg_2017);
@@ -53,19 +45,15 @@
 	<title>{app.name}</title>
 </svelte:head>
 
-{#await map_communes then communes}
-{#await map_bureaux then bureaux}
 {#await pres_2017 then all_pres_2017}
 {#await leg_2017 then all_leg_2017}
 {#await pres_2022 then all_pres_2022}
 
 
 <div class="app">
-	<Presentation {communes} {bureaux} {all_pres_2017} {all_leg_2017} {all_pres_2022} />
+	<Presentation {all_pres_2017} {all_leg_2017} {all_pres_2022} />
 </div>
 
-{/await}
-{/await}
 {/await}
 {/await}
 {/await}

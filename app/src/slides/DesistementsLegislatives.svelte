@@ -1,6 +1,6 @@
 <script>
-    import { getContext, onMount } from 'svelte';
-    import { writable } from 'svelte/store';
+    import { getContext, setContext, onMount } from 'svelte';
+    import { writable, derived } from 'svelte/store';
 
     import { scaleLinear, scaleSequential, scaleOrdinal } from 'd3-scale';
 
@@ -10,11 +10,6 @@
     import DesistementsParBureau from './DesistementsParBureau.svelte';
 
     export let communes, bureaux, pres_2017, pres_2017_bureau, leg_2017, leg_2017_bureau;
-
-    
-    let selection = getContext('communes-actives');
-
-    let display_score = "CHOTARD";
 
     let group_size_pres_2017 = [0, 80, 110, 150, 290, 350];
 	let group_size_leg_2017 = [0, 80, 110, 150, 290, 350];
@@ -65,11 +60,11 @@
         } else {
             groupes_politiques = {
                 non_candidat: ['abstention', 'blancs', 'nuls'],
-                macron: ['REM'].map( nuance => candidatParNuance(nuance, candidats) ),
-                droite: ['LR'].map( nuance => candidatParNuance(nuance, candidats) ),
-                gauche: ['FI', 'RDG', 'ECO', 'EXG'].map( nuance => candidatParNuance(nuance, candidats) ),
-                extreme_droite: ['FN', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) ),
-                autre: ['DVG', 'DIV', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) )
+                macron: ['REM'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+                droite: ['LR'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+                gauche: ['FI', 'RDG', 'ECO', 'EXG'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+                extreme_droite: ['FN', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+                autre: ['DVG', 'DIV', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined)
             }
         }
         return groupes_politiques;
@@ -94,18 +89,38 @@
         return correspondances;
     }
 
+    ///////////////////////////////////////////////
+    //           GET THE DERIVED STORES          //
+    ///////////////////////////////////////////////
+    
+
     // Les candidats et les groupes politiques auxquels il appartiennent
-    let candidats_pres_2017 = writable(getCandidats(pres_2017));
+    let candidats_pres_2017 = getCandidats(pres_2017);
+
     let candidats_leg_2017 = writable(getCandidats(leg_2017));
 
-    let groupes_politiques_pres_2017 = getGroupesPolitiques('pres_2017', $candidats_pres_2017);
-    let groupes_politiques_leg_2017 = getGroupesPolitiques('leg_2017', $candidats_leg_2017);
+    $: console.log(candidats_leg_2017);
+
+    // On affiche le candidat de la FI
+    let display_score;
+
+    Object.keys($candidats_leg_2017).forEach(id => {
+        if ($candidats_leg_2017[id].nuance == "FI") {
+            display_score = id;
+        }
+    });
+
+    $: console.log(display_score);
+
+    let groupes_politiques_pres_2017 = getGroupesPolitiques('pres_2017', candidats_pres_2017);
+    let groupes_politiques_leg_2017 = derived(candidats_leg_2017, 
+        $candidats_leg_2017 => getGroupesPolitiques('leg_2017', $candidats_leg_2017));
     
-    console.log(groupes_politiques_pres_2017);
+    console.log(communes);
     console.log($candidats_leg_2017);
 
     // Progression de l'abstention
-    $: correspondance_leg_pres = correspondancePresidentielleLegislative($candidats_pres_2017, $candidats_leg_2017);
+    $: correspondance_leg_pres = derived(candidats_leg_2017, $candidats_leg_2017 => correspondancePresidentielleLegislative(candidats_pres_2017, $candidats_leg_2017));
     $: console.log(correspondance_leg_pres);
 
 
@@ -120,24 +135,27 @@
             // display_score: le nom du candidat dont on observe l'évolution
             // Il faut la correspondance pour la présidentielle.
 
-            let score_pres = pres_2017.get(cp).get(correspondance_leg_pres[display_score]).total_voix;
+            let score_pres = pres_2017.get(cp).get($correspondance_leg_pres[display_score]).total_voix;
             let score_leg = leg_2017.get(cp).get(display_score).total_voix;
 
             return score_pres - score_leg;
         }
     }
-
+    
     $: {
         differencePresidentielleLegislativesBureau = function(id_b_vote) {
-            let score_pres = pres_2017_bureau.get(id_b_vote).get(correspondance_leg_pres[display_score]).total_voix;
+            console.log(id_b_vote);
+            let score_pres = pres_2017_bureau.get(id_b_vote).get($correspondance_leg_pres[display_score]).total_voix;
             let score_leg = leg_2017_bureau.get(id_b_vote).get(display_score).total_voix;
 
             return score_pres - score_leg;
         }
     }
+    
 
 </script>
 
+<!--
 <div class="analyse">
     <h1>Démobilisation de l'électorat entre la présidentielle et les législatives de 2017</h1>
 
@@ -162,14 +180,15 @@
 
     <p>Julien AUBERT (LR), arrivé en 2è position, est qualifié pour le second tour avec 8.367 voix, 3.475 voix d'avance sur Stéphane Chotard. Or, il y a 7.352 électeurs de Mélenchon qui n'ont pas fait le déplacement. C'est-à-dire que convaincre 50% des abstentionnistes précédemment électeurs de Mélenchon à la présidentielle aurait suffit à se qualifier pour le second tour.</p>
 </div>
-
+-->
 <div id="desistements-legislatives">
 
     <div class="map-navigation">
         <div class="map-widgets">
             <div class="candidat-selection">
                 <select bind:value={display_score} style="width: 100%;">
-                    {#each Object.keys(correspondance_leg_pres) as candidat}
+                    <option value="" selected>--choisissez un candidat--</option>
+                    {#each Object.keys($correspondance_leg_pres) as candidat}
                         <option value={candidat} >{$candidats_leg_2017[candidat].nom}</option>
                     {/each}
 
@@ -178,7 +197,6 @@
 
             <MapSelection />
            
-            
         </div>
 
         <!--
@@ -189,6 +207,7 @@
                 color={} />
         {:else}
         -->
+        
         <Map communes={communes} 
             bureaux={bureaux}
             colors={(code_commune) => colorScaleResults(differencePresidentielleLegislatives(code_commune))} />
@@ -206,11 +225,12 @@
     <div class="resultats">
         <Legend 
             group_size={group_size_leg_2017} 
-            candidats={candidats_leg_2017}
-            groupes_politiques={groupes_politiques_leg_2017}
+            candidats={$candidats_leg_2017}
+            groupes_politiques={$groupes_politiques_leg_2017}
             resultats_election={leg_2017} />
     </div>
 </div>
+
 
 <div id="desistements-par-bureau">
     <DesistementsParBureau 

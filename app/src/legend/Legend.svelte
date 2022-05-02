@@ -8,7 +8,9 @@
 
     // CP de la commune survolée    
     let hovered_selection = getContext('commune-hovered');
-    let selection = getContext('communes-actives')
+    let selection = getContext('communes-actives');
+
+    $: console.log($selection);
     
     // Remettre à zéro le score des candidats lors de la désélection
     function resetScores(candidats) {
@@ -25,13 +27,8 @@
         return candidats;
     }
 
-    console.log($candidats);
+    console.log(candidats);
     console.log(groupes_politiques);
-
-    
-
-    setContext('candidats', $candidats);
-    setContext('groupes-politiques', groupes_politiques);
 
     
     $: if ($selection == []) {
@@ -49,24 +46,27 @@
     // Soit on survole une commune, et on affiche les résultats de cette commune uniquement
     // Sinon, on affiche la somme de la sélection
     $: {
-        $candidats = resetScores($candidats);
+        candidats = resetScores(candidats);
         if ($hovered_selection != '') {
             console.log($hovered_selection);
             total_inscrits = resultats_election.get($hovered_selection).get('abstention').total_inscrits;
 
-            Object.keys($candidats).forEach( nom => {
-                $candidats[nom].total_voix = resultats_election.get($hovered_selection).get(nom).total_voix;
+            Object.keys(candidats).forEach( nom => {
+                candidats[nom].total_voix = resultats_election.get($hovered_selection).get(nom).total_voix;
             })
 
         } else {
+            console.log(candidats);
+            console.log($selection);
             for (let cp of $selection) {
-                Object.keys($candidats).forEach( nom => {
-                    $candidats[nom].total_voix = $candidats[nom].total_voix + resultats_election.get(cp).get(nom).total_voix;
+
+                Object.keys(candidats).forEach( nom => {
+                    candidats[nom].total_voix = candidats[nom].total_voix + resultats_election.get(cp).get(nom).total_voix;
                 })
             }
         }
 
-        total_inscrits = sum(Object.keys($candidats), nom => $candidats[nom].total_voix);
+        total_inscrits = sum(Object.keys(candidats), nom => candidats[nom].total_voix);
     }
 </script>
 

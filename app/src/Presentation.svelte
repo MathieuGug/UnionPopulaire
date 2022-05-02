@@ -1,16 +1,15 @@
 <script>
     import { rollup, sum } from 'd3-array';
-import { getContext } from 'svelte';
+    import { getContext, setContext } from 'svelte';
+    import { writable, derived } from 'svelte/store';
 
-    import { cp_circo_5 } from './candidats.js';
+    import { loadMap, loadBureaux } from './load_data.js';
 
     import ComparaisonPresidentielles from './slides/ComparaisonPresidentielles.svelte';
     import DesistementsLegislatives from './slides/DesistementsLegislatives.svelte';
 
-    export let communes, bureaux, all_pres_2017, all_leg_2017, all_pres_2022;
+    export let all_pres_2017, all_leg_2017, all_pres_2022;
 
-    let dpt = getContext('departement');
-    let circo = getContext('circonscription');
 
     // Fonction pour récupérer les élements unique d'un array avec filter
     // Utile pour récupérer les numéros des circos par département
@@ -20,20 +19,46 @@ import { getContext } from 'svelte';
 
     // Les circonscriptions dans le département
 	function circosDansDepartement (dpt) { 
-        let circo_dpt = all_pres_2017
+        let circos_dpt = all_pres_2017
             .filter(d => +d.code_dpt == dpt)
             .map(d => +d.code_circ)
             .filter(onlyUnique);
 
-        return circo_dpt;
+        return circos_dpt;
     }
+
+    function communesDansCirco (dpt, circo) {
+        let codes_communes = all_pres_2017
+            .filter(d => (d.code_dpt == dpt) & (d.code_circ == circo) )
+            .map(d => d.code_commune)
+            .filter(onlyUnique);
+
+        return codes_communes;
+    }
+
+    /////////////////////////////////////////////////
+    //       LES STORES DYNAMIQUES UTILISÉS        //
+    /////////////////////////////////////////////////
+    // padding de 2
+    let dpt = getContext('departement'); // Initialement '84'
+    let circo = getContext('circonscription'); // Initialement '05'
+
+    $: console.log(`Département: ${$dpt}, circo: ${$circo}`);
 
     // Les départements en région PACA
     let dpt_paca = [4, 5, 6, 13, 83, 84];
 
-	$: circo_dpt = circosDansDepartement($dpt);
-    $: console.log($dpt);
-    $: console.log(circo_dpt);
+	$: circos_dpt = circosDansDepartement($dpt);
+
+    let codes_communes = derived([dpt, circo], ([$dpt, $circo]) => (communesDansCirco($dpt, $circo)));
+    setContext('codes-communes', codes_communes);
+
+    $: console.log(circos_dpt); // [1,2,3,4,5] initialement
+
+	let selection = writable($codes_communes);
+    setContext('communes-actives', selection);
+    console.log($selection);
+
 
     /////////////////////////////////////////////////////
     //  FILTRER LES DONNEES EN FONCTION DU DPT / CIRCO //
@@ -43,9 +68,9 @@ import { getContext } from 'svelte';
         return resultats.filter(d => (+d.code_dpt == dpt) & (+d.code_circ == circo))
     }
 
-    $: res_pres_2017 = filtrerResultats(all_pres_2017, $dpt, $circo);
-    $: res_leg_2017 = filtrerResultats(all_leg_2017, $dpt, $circo);
-    $: res_pres_2022 = filtrerResultats(all_pres_2022, $dpt, $circo);
+    let res_pres_2017 = derived([dpt, circo], ([$dpt, $circo]) => filtrerResultats(all_pres_2017, $dpt, $circo));
+    let res_leg_2017 = derived([dpt, circo], ([$dpt, $circo]) => filtrerResultats(all_leg_2017, $dpt, $circo));
+    let res_pres_2022 = derived([dpt, circo], ([$dpt, $circo]) => filtrerResultats(all_pres_2022, $dpt, $circo));
 
 
 	// Data blending
@@ -88,9 +113,9 @@ import { getContext } from 'svelte';
         }
     }
 
-    function scoreParCommune ( { pres_2017, leg_2017, pres_2022 } ) {
+    function scoreParCommune ( { pres_2017, leg_2017, pres_2022 }, circos_dpt ) {
         /* Return an object {cp: {pres_2017, leg_2017, pres_2022} } where the results are a map for each candidate in the election */
-		let score_par_commune = cp_circo_5.map( cp =>
+		let score_par_commune = circos_dpt.map( cp =>
             [cp, {
                 pres_2017: pres_2017.get(cp),
                 leg_2017: leg_2017.get(cp),
@@ -100,10 +125,11 @@ import { getContext } from 'svelte';
         return Object.fromEntries(new Map(score_par_commune));
         };
 
-    $: ( { pres_2017, leg_2017, pres_2022 } = scoreParElection(res_pres_2017, res_leg_2017, res_pres_2022) );
-    $: ( { pres_2017_bureau, leg_2017_bureau } = scoreParElectionParBureau(res_pres_2017, res_leg_2017, res_pres_2022) );
+    $: ( { pres_2017, leg_2017, pres_2022 } = scoreParElection($res_pres_2017, $res_leg_2017, $res_pres_2022) );
+    $: ( { pres_2017_bureau, leg_2017_bureau } = scoreParElectionParBureau($res_pres_2017, $res_leg_2017, $res_pres_2022) );
 
-    $: score_par_commune = scoreParCommune( { pres_2017, leg_2017, pres_2022 } );
+    $: console.log(leg_2017_bureau);
+    $: score_par_commune = scoreParCommune( { pres_2017, leg_2017, pres_2022 }, circos_dpt );
     /*
     console.log('Score par commune:')
     $: console.log(score_par_commune);
@@ -116,12 +142,20 @@ import { getContext } from 'svelte';
     */
 
     $: console.log(leg_2017)
+
+    //////////////////////////////////////////////
+    //  LIRE LA CARTE DES COMMUNES DE LA CIRCO  //
+    //////////////////////////////////////////////
+
+    let map_communes = derived(codes_communes, $codes_communes => loadMap($codes_communes));
+    let map_bureaux = derived(codes_communes, $codes_communes => loadBureaux($codes_communes));
+
 </script>
 
 <div class="geo-select">
     <label for="dpt-select">Sélectionnez un département:</label>
 
-    <select name="dpt" id="dpt-select" bind:value={$dpt}>
+    <select name="dpt" id="dpt-select" bind:value={$dpt} on:change={() => $selection = $codes_communes}>
         <option value="">--choisissez un département--</option>
         {#each dpt_paca as dpt}
         <option value={dpt}>{dpt}</option>
@@ -130,19 +164,26 @@ import { getContext } from 'svelte';
 
     <label for="circo-select">Sélectionnez une circo:</label>
 
-    <select name="dpt" id="circo-select" bind:value={$circo}>
+    <select name="dpt" id="circo-select" bind:value={$circo} on:change={() => $selection = $codes_communes} >
         <option value="">--choisissez une circonscription--</option>
-        {#each circo_dpt as circ}
+        {#each circos_dpt as circ}
         <option value={circ}>{circ}</option>
         {/each}
     </select>
 </div>
 
-<!-- Le taux de conviction des abstentionnistes sur les 5 dernières années 
-<ComparaisonPresidentielles {communes} {bureaux} {score_par_commune} {pres_2017} {pres_2022} /> -->
+{#await $map_communes then communes}
+{#await $map_bureaux then bureaux}
+<DesistementsLegislatives {communes} {bureaux} {pres_2017} {pres_2017_bureau} {leg_2017} {leg_2017_bureau} />
+{/await}
+{/await}
+
+
+<!--
+ Le taux de conviction des abstentionnistes sur les 5 dernières années
+<ComparaisonPresidentielles {communes} {bureaux} {score_par_commune} {pres_2017} {pres_2022} />  -->
 
 <!-- Les électeurs de Mélenchon qui sont restés chez eux -->
-<DesistementsLegislatives {communes} {bureaux} {pres_2017} {pres_2017_bureau} {leg_2017} {leg_2017_bureau} /> 
 
 <style>
 

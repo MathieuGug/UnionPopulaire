@@ -7,12 +7,17 @@
 
     import { geoMercator, geoPath } from 'd3-geo';
 
-    import { csv } from 'd3-fetch';
     import { rollup, sum, index } from 'd3-array';
 
     export let communes, bureaux, colors;
 
-    let selection = getContext('communes-actives');
+    // Bind la sélection de la carte
+    let selection = [];
+    $: console.log(selection);
+
+    let selection_active = getContext('communes-actives');
+    console.log(selection_active);
+
     let selection_bureaux = getContext('bureaux-actifs');
     let hovered_selection = getContext('commune-hovered');
     let display_score = getContext('display-score');
@@ -29,13 +34,13 @@
     <div class="basemap">
         <BaseMap projection={geoMercator}>
             
-            <FeatureLayer bind:selection={$selection}
+            <FeatureLayer bind:selection={$selection_active}
                 geojson={communes} 
                 idAccessor={ feature => feature.properties.code} 
                 let:hoveredFeature
                 on:mouseenter={(e) => $hovered_selection = e.detail.feature.properties.code}
                 on:mouseleave={() => $hovered_selection = ''}
-                selectMode={60}
+                selectMode={Infinity}
                 styleAccessor={(feature, selected) => {
                     return {
                         'fill': colors(feature.properties.code),

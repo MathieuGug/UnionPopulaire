@@ -1,5 +1,4 @@
 import { csv, json } from 'd3-fetch';
-import { cp_circo_5 } from './candidats.js';
 
 export async function loadResults(path) {
     // One node for each voter
@@ -7,8 +6,7 @@ export async function loadResults(path) {
     let action, nom;
     let elector_bureau;
 
-    var response = await csv(path, d => {
-        
+    await csv(path, d => {
         nodes.push( {
             code_dpt: d.code_dpt,
             dpt: d.dpt,
@@ -34,24 +32,25 @@ export async function loadResults(path) {
 }
 
 
-export async function loadMap() {
+export async function loadMap(codes_communes) {
+    // codes_communes: Tableaux des codes des communes de la circo choisie
     var features = [];
     
-    var communes = await json('./data/communes.json');
+    var communes = await json('./data/communes-provence-alpes-cote-d-azur.geojson');
     for (let feature of communes.features) {
-        if (cp_circo_5.includes(feature.properties.code)) {
+        if (codes_communes.includes(feature.properties.code)) {
             features.push(feature);
         }
     }
     return {type:"FeatureCollection", features };
 }
 
-export async function loadBureaux() {
+export async function loadBureaux(codes_communes) {
     let features = [];
     let feature = {};
 
     var bureaux = await csv('./data/geo_bureaux_de_vote.csv');
-    bureaux = bureaux.filter(d => cp_circo_5.includes(d.commune_code));
+    bureaux = bureaux.filter(d => codes_communes.includes(d.commune_code));
 
     for (let bureau of bureaux) {
         feature = {
