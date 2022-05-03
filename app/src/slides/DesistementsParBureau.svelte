@@ -94,4 +94,9 @@ th, td {
 tr:nth-child(even) {background-color: #f2f2f2;}
 tr:hover {background-color: coral;}
 
+@media only screen and (max-width: 800px) {
+    table {
+        font-size: 10px;
+    }
+}
 </style>
