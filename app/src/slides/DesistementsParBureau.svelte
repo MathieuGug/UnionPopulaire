@@ -46,28 +46,28 @@
             <th>Code Postal</th> 
             <th>Adresse</th> 
 
-            <th>Inscrits prés</th>
-            <th>Votes prés FI</th> 
-            <th>Inscrits leg</th>
-            <th>Votes leg FI</th> 
+            <th>Inscrits (P2017)</th>
+            <!--<th>Inscrits (L2017))</th>-->
+            <th>Votes (P2017)</th> 
+            <th>Votes (L2017)</th> 
 
-            <th>Diff</th> 
-            <th>% des votants</th>
+            <th>Pertes de voix</th> 
+            <th>% de votants perdus</th>
           </tr>
         </thead>
         <tbody>
         {#each $bureaux_filtered as bureau, i}
           <tr>
-            <td>{+bureau.code_bureau}</td>
+            <td>{bureau.code_bureau}</td>
             <td>{bureau.ville}</td>
             <td>{bureau.cp}</td>
             <td>{bureau.adresse}</td>
 
             <!-- Les résultats -->
             <td>{$presidentielle_2017_bureau.get(bureau.id_b_vote).get('abstention').total_inscrits}</td>
-            <td>{$presidentielle_2017_bureau.get(bureau.id_b_vote).get($correspondance_leg_pres[$display_score]).total_voix}</td>
+            <!--<td>{$legislatives_2017_bureau.get(bureau.id_b_vote).get('abstention').total_inscrits}</td>-->
 
-            <td>{$legislatives_2017_bureau.get(bureau.id_b_vote).get('abstention').total_inscrits}</td>
+            <td>{$presidentielle_2017_bureau.get(bureau.id_b_vote).get($correspondance_leg_pres[$display_score]).total_voix}</td>
             <td>{$legislatives_2017_bureau.get(bureau.id_b_vote).get($display_score).total_voix}</td>
 
             <td>{differencePresidentielleLegislativesBureau(bureau.id_b_vote)}</td>
