@@ -114,7 +114,7 @@
 </div>
 -->
 <div id="desistements-legislatives">
-
+    <p>Résultats du 1er tour.</p>
     <div id="resultats-container">
         <div class="resultats">
             <p>Présidentielle 2017</p>

@@ -204,7 +204,7 @@
 </script>
 
 <div id="credits">
-    <p>Une application pour l'Union Populaire Ecologique et Sociale, par Mathieu Guglielmino. Données tirées de <a href="https://www.data.gouv.fr/fr/">data.gouv.fr</a>.</p>
+    <p>Une application pour l'Union Populaire Ecologique et Sociale, par Mathieu Guglielmino (<a href="https://twitter.com/guglimat/">Twitter</a>). Données tirées de <a href="https://www.data.gouv.fr/fr/">data.gouv.fr</a>.</p>
 </div>
 
 <div class="geo-select">
