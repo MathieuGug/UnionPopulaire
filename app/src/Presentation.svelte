@@ -252,7 +252,7 @@
 </script>
 
 <div id="credits">
-    <p>Une application pour l'Union Populaire Ecologique et Sociale, par Mathieu Guglielmino (<a href="https://twitter.com/guglimat/">Twitter</a>, <a href="https://cygraph.tech/">CyGraph</a>). Données tirées de <a href="https://www.data.gouv.fr/fr/">data.gouv.fr</a>.</p>
+    <p>Une application pour la Nouvelle union populaire, écologique et sociale, par Mathieu Guglielmino (<a href="https://twitter.com/guglimat/">Twitter</a>, <a href="https://cygraph.tech/">CyGraph</a>). Données tirées de <a href="https://www.data.gouv.fr/fr/">data.gouv.fr</a>.</p>
 </div>
 
 {#await $map_bureaux then bureaux}
