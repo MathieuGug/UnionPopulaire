@@ -321,6 +321,7 @@
 <style>
 
 #credits {
+    padding: 10px;
     font-size: 12px;
 }
 
@@ -363,6 +364,12 @@
     height: 250px;
 }
 
+@media only screen and (max-width: 800px) {
+    #header {
+        display: flex;
+        flex-direction: column;
+}
+}
 
 </style>
 <!--

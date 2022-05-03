@@ -121,6 +121,7 @@ tbody td.svg-col{
   width: 50px;
 }
 
+
 </style>
 <!--
 <svg height="550px" width="450px">

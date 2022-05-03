@@ -134,4 +134,10 @@
     text-decoration: underline;
 }
 
+@media only screen and (max-width: 800px) {
+    #resultats-container {
+        display: flex;
+        flex-direction: column;
+    }
+}
 </style>
