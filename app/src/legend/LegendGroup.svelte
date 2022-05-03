@@ -24,7 +24,7 @@
         <text transform="translate(0, {22*i})">{candidat}</text>
 
         
-        <rect x="300" y={22*i-15} width={xScale(candidats[candidat].total_voix / total_inscrits)} height="20" fill='black' />
+        <rect x="300" y={22*i-15} width={xScale(candidats[candidat].total_voix / total_inscrits)} height="20" fill={candidats[candidat].color} />
         <text text-anchor="right" transform="translate(200, {22*i})">{candidats[candidat].total_voix}</text>
         {#if candidats[candidat].total_voix != 0}
             <text text-anchor="right" transform="translate(250, {22*i})">{Math.round(candidats[candidat].total_voix / total_inscrits * 1000)/10}%</text>

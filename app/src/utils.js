@@ -4,12 +4,37 @@ import { rollup, sum } from 'd3-array';
 //  Construire le dictionnaire dynamiquement à partir des résultats  //
 ///////////////////////////////////////////////////////////////////////
 
+function colorParNuance(nuance) {
+    let color;
+    if (nuance == "REM") {
+        color = "#EFCB68";
+    } else if (nuance == "FI") {
+        color = '#5F0A87';
+    } else if (nuance == "ECO") {
+        color = '#ADD6A7';
+    } else if (nuance == "LR") {
+        color = '#7AA2DF';
+    } else if (nuance == "FN") {
+        color = '#1B2CC1';
+    } else if (nuance == "COM") {
+        color = '#CE6C47';
+    } else if (nuance == "EXG") {
+        color = '#A4508B';
+    } else if (nuance == "SOC") {
+        color = '#EFA8B8';
+    } else {
+        color = "#000000";
+    }
+    return color;
+
+}
 export function getCandidats (resultats) {
     let first_cp = Array.from(resultats.keys())[0];
     let candidats = Object.fromEntries(
             Array.from(resultats.get(first_cp).keys()).map(id => [id, {
                 nuance: resultats.get(first_cp).get(id).nuance,
                 nom: resultats.get(first_cp).get(id).nom,
+                color: colorParNuance(resultats.get(first_cp).get(id).nuance),
                 total_voix: 0}])
         );
     return candidats;
