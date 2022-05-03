@@ -32,7 +32,6 @@
     }
 
     let total_inscrits = 0;
-    console.log(resultats_election);
 
     /////////////////////////////////////////////////
     //  ACTUALISATION EN FONCTION DE LA SELECTION  //
@@ -42,8 +41,8 @@
     // Sinon, on affiche la somme de la sélection
     $: {
         candidats = resetScores(candidats);
+
         if ($hovered_selection != '') {
-            console.log($hovered_selection);
             total_inscrits = resultats_election.get($hovered_selection).get('abstention').total_inscrits;
 
             Object.keys(candidats).forEach( nom => {
@@ -52,9 +51,10 @@
 
         } else {
             console.log(candidats);
-            console.log($selection);
-            for (let cp of $selection) {
+            console.log(resultats_election);
 
+            for (let cp of $selection) {
+                
                 Object.keys(candidats).forEach( nom => {
                     candidats[nom].total_voix = candidats[nom].total_voix + resultats_election.get(cp).get(nom).total_voix;
                 })

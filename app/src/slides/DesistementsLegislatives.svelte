@@ -2,21 +2,18 @@
     import { getContext, setContext, onMount } from 'svelte';
     import { writable, derived } from 'svelte/store';
 
-    import { scaleLinear, scaleSequential, scaleOrdinal } from 'd3-scale';
-
     import Map from '../Map.svelte';
     import MapSelection from '../MapSelection.svelte';
 	import Legend from '../legend/Legend.svelte';    
     import DesistementsParBureau from './DesistementsParBureau.svelte';
-
-    import { getGroupesPolitiques, correspondancePresidentielleLegislative } from '../utils.js';
     
-    export let communes, bureaux;
+    export let bureaux;
 
     let group_size_pres_2017 = [0, 80, 110, 150, 290, 350];
     let group_size_pres_2022 = [0, 80, 110, 150, 290, 370];
 	let group_size_leg_2017 = [0, 80, 110, 150, 290, 350];
-    let display_score = writable(''); // Le candidat dont on affiche la perte de voix
+
+    let display_score = getContext("display-score");
 
     ///////////////////////////////////////////////
     //     GET THE CONTEXT FROM PRESENTATION     //
@@ -41,49 +38,11 @@
     let groupes_politiques_pres_2017 = getContext('groupes-politiques-presidentielles-2017');
     let groupes_politiques_pres_2022 = getContext('groupes-politiques-presidentielles-2022');
     let groupes_politiques_leg_2017 = getContext('groupes-politiques-legislatives-2017');
-
-    // Afficher les résultats du candidat FI
-    Object.keys($candidats_leg_2017).forEach(id => {
-        if ($candidats_leg_2017[id].nuance == "FI") {
-            $display_score = id;
-        }
-    });
-
-    // A quel candidat de l'élection présidentielle correspond les candidats de l'élection législatives
-    let correspondance_leg_pres = derived(candidats_leg_2017,
-        $candidats_leg_2017 => correspondancePresidentielleLegislative(candidats_pres_2017, $candidats_leg_2017));
-
-    setContext("correspondance-presidentielle-legislatives", correspondance_leg_pres);
-    setContext("display-score", display_score);
-
-    let colorScaleResults = scaleSequential(["blue", "red"])
-        .domain([-200, 200]);
-
-    // En fonction d'un CP et d'un candidat, check la perte de voix entre la présidentielle et les législatives
-    let differencePresidentielleLegislatives, differencePresidentielleLegislativesBureau;
-
-    $: {
-        differencePresidentielleLegislatives = function(cp) {
-            // display_score: le nom du candidat dont on observe l'évolution
-            // Il faut la correspondance pour la présidentielle.
-
-            let score_pres = $presidentielle_2017_cp.get(cp).get($correspondance_leg_pres[$display_score]).total_voix;
-            let score_leg = $legislatives_2017_cp.get(cp).get($display_score).total_voix;
-
-            return score_pres - score_leg;
-        }
-    }
     
 
     //////////////////////////////////////////////
     //          CHECK SI TOUT VA BIEN           //
     //////////////////////////////////////////////
-    $: {
-        console.log("DESISTEMENTS LEGISLATIVES");
-
-
-
-    }
 
 </script>
 
@@ -145,28 +104,6 @@
         </div>
 
     </div>
-
-
-    <div class="map-navigation">
-        <div class="map-widgets">
-            <div class="candidat-selection">
-                <select bind:value={$display_score}>
-                    <option value="" selected>--choisissez un candidat--</option>
-                    {#each Object.keys($correspondance_leg_pres) as candidat}
-                        <option value={candidat} >{$candidats_leg_2017[candidat].nom} - {$candidats_leg_2017[candidat].nuance}</option>
-                    {/each}
-
-                </select>
-            </div>
-            <MapSelection />
-            
-        </div>
-        
-        <Map communes={communes} 
-            bureaux={bureaux}
-            colors={(code_commune) => colorScaleResults(differencePresidentielleLegislatives(code_commune))} />
-        
-    </div>
 </div>
 
 
@@ -187,6 +124,7 @@
     flex-direction: row;
     height: auto;
 }
+
 .resultats {
     width: 100%;
 }
@@ -197,10 +135,4 @@
     text-decoration: underline;
 }
 
-.map-navigation {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-}
 </style>

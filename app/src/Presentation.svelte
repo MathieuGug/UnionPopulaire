@@ -1,15 +1,19 @@
 <script>
     import { getContext, setContext } from 'svelte';
     import { writable, derived } from 'svelte/store';
+    import { scaleSequential } from 'd3-scale';
 
     import { loadMap, loadBureaux } from './load_data.js';
 
     import ComparaisonPresidentielles from './slides/ComparaisonPresidentielles.svelte';
     import DesistementsLegislatives from './slides/DesistementsLegislatives.svelte';
+    import MapSelection from './MapSelection.svelte';
+    import Map from './Map.svelte';
 
     import { getCandidats, getGroupesPolitiques, scoreParCommune, scoreParBureau } from './utils.js';
     import { filtrerResultats } from './utils.js';
     import { circosDansDepartement, communesDansCirco } from './utils.js';
+    import { correspondancePresidentielleLegislative } from './utils.js';
 
     /////////////////////////////////////////////////
     //       PROPS : RESULTATS DES ELECTIONS       //
@@ -33,7 +37,7 @@
         // {code_dpt: 5, nom_dpt: "Hautes-Alpes"},
         // {code_dpt: 6, nom_dpt: "Alpes-Maritimes"},
         // {code_dpt: 13, nom_dpt: "Bouches-du-Rhône"},
-        // {code_dpt: 83, nom_dpt: "Var"},
+        {code_dpt: 83, nom_dpt: "Var"},
         {code_dpt: 84, nom_dpt: "Vaucluse"}
 ]
 
@@ -106,6 +110,20 @@
     //  CONTEXTES APRES AVOIR CHARGÉ LES DONNEES  //
     ////////////////////////////////////////////////
 
+    // Le candidat dont on affiche la perte de voix
+    let display_score = writable(''); 
+    setContext("display-score", display_score);
+
+    // Afficher les résultats du candidat FI
+    $: Object.keys($candidats_leg_2017).forEach(id => {
+        if ($candidats_leg_2017[id].nuance == "FI") {
+            $display_score = id;
+        }
+    });
+
+    let colorScaleResults = scaleSequential(["blue", "red"])
+        .domain([-200, 200]);
+
     // La sélection active, bind avec la carte, à la base tout est sélectionné
 	let selection = writable($codes_communes); 
 
@@ -134,11 +152,39 @@
     setContext('legislatives-2017-cp', legislatives_2017_cp);
     setContext('legislatives-2017-bureau', legislatives_2017_bureau);
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    //  LA DIFFERENCE ENTRE LE SCORE A LA PRESIDENTIELLE ET AUX LEGISLATIVES  //
+    ////////////////////////////////////////////////////////////////////////////
+
+    // A quel candidat de l'élection présidentielle correspond les candidats de l'élection législatives
+    let correspondance_leg_pres = derived(candidats_leg_2017,
+        $candidats_leg_2017 => correspondancePresidentielleLegislative(candidats_pres_2017, $candidats_leg_2017));
+
+    setContext("correspondance-presidentielle-legislatives", correspondance_leg_pres);
+
+    // En fonction d'un CP et d'un candidat, check la perte de voix entre la présidentielle et les législatives
+    let differencePresidentielleLegislatives;
+
+    $: {
+        differencePresidentielleLegislatives = function(cp) {
+            // display_score: le nom du candidat dont on observe l'évolution
+            // Il faut la correspondance pour la présidentielle.
+
+            let score_pres = $presidentielle_2017_cp.get(cp).get($correspondance_leg_pres[$display_score]).total_voix;
+            let score_leg = $legislatives_2017_cp.get(cp).get($display_score).total_voix;
+
+            return score_pres - score_leg;
+        }
+    }
+
+
     //////////////////////////////////////////////
     //          CHECK SI TOUT VA BIEN           //
     //////////////////////////////////////////////
 
     $: console.log(`Département: ${$dpt}, circo: ${$circo}`);
+    $: console.log(`Afficher le score de ${$display_score}`);
     $: console.log(`Sélection active: ${$selection}`);
     $: console.log($circos_dpt); // [1,2,3,4,5] initialement
 
@@ -188,17 +234,19 @@
 
         console.log("LÉGISLATIVES 2017 CP");
         console.log($legislatives_2017_cp);
+
+        // Réselectionner les communes quand on change de circo
+        $selection = $codes_communes;
+        $dpt = $dpt;
     }
 
     function handleDepartementChange () {
-        dpt_circo_choisis = false;
+        $circo = 1;
     }
     
     function handleCircoChange() {
-        if ($circo != '') {
-            $selection = $codes_communes;
-            dpt_circo_choisis = true;
-        }
+        $selection = [];
+        dpt_circo_choisis = true;
     }
 
 </script>
@@ -207,51 +255,67 @@
     <p>Une application pour l'Union Populaire Ecologique et Sociale, par Mathieu Guglielmino (<a href="https://twitter.com/guglimat/">Twitter</a>, <a href="https://cygraph.tech/">CyGraph</a>). Données tirées de <a href="https://www.data.gouv.fr/fr/">data.gouv.fr</a>.</p>
 </div>
 
-<div class="geo-select">
-    <label for="dpt-select">Sélectionnez un département:</label>
-
-    <select name="dpt" id="dpt-select" bind:value={$dpt} on:change={handleDepartementChange}>
-        <option value="">--choisissez un département--</option>
-        {#each dpt_paca as dpt}
-        <option value={dpt.code_dpt}>{dpt.code_dpt} - {dpt.nom_dpt}</option>
-        {/each}
-    </select>
-
-    <label for="circo-select">Sélectionnez une circo:</label>
-
-    <select name="dpt" id="circo-select" bind:value={$circo} on:change={handleCircoChange} >
-        {#if !dpt_circo_choisis}
-            <option value="" selected>--choisissez une circonscription--</option>
-        {/if}
-
-        {#each $circos_dpt as circ}
-            <option value={circ}>{circ}ème circonscription</option>
-        {/each}
-        
-    </select>
-</div>
-
-{#await $map_communes then communes}
 {#await $map_bureaux then bureaux}
 
-<!-- Le taux de conviction des abstentionnistes sur les 5 dernières années
+<div id="header">
+    <div id="map-navigation">
+        <div id="geo-select">
+            <label for="dpt-select">Sélectionnez un département:</label>
+        
+            <select name="dpt" id="dpt-select" bind:value={$dpt} on:input={() => ($circo = 1)}>
+                <option value="">--choisissez un département--</option>
+                {#each dpt_paca as departement}
+                    {#if departement == $dpt}
+                        <option value={departement.code_dpt} selected>{departement.code_dpt} - {departement.nom_dpt}</option>
+                    {:else}
+                    <option value={departement.code_dpt}>{departement.code_dpt} - {departement.nom_dpt}</option>
+                    {/if}
+                {/each}
+            </select>
+        
+            <label for="circo-select">Sélectionnez une circo:</label>
+        
+            <select name="dpt" id="circo-select" bind:value={$circo} >
+                <option value="">--choisissez une circonscription--</option>
+        
+                {#each $circos_dpt as circ}
+                    <option value={circ}>{circ}ème circonscription</option>
+                {/each}
+                
+            </select>
+        </div>
 
-<ComparaisonPresidentielles
-    {communes}
-    {bureaux}
-    {score_par_commune}
-    {candidats_pres_2017}
-    {pres_2017}
-    {candidats_pres_2022}
-    {pres_2022} />   -->
+        <div id="map-widgets">
+            <div class="candidat-selection">
+                <select bind:value={$display_score}>
+                    <option value="" selected>--choisissez un candidat--</option>
+                    {#each Object.keys($correspondance_leg_pres) as candidat}
+                        <option value={candidat} >{$candidats_leg_2017[candidat].nom} - {$candidats_leg_2017[candidat].nuance}</option>
+                    {/each}
 
-{#if dpt_circo_choisis}
-    <DesistementsLegislatives
-        {communes}
+                </select>
+
+                <button on:click={() => $selection = $codes_communes}>Tout sélectionner</button>
+                <button on:click={() => $selection = []}>Tout désélectionner</button>
+            </div>
+
+            
+        </div>
+    </div>
+
+
+    {#await $map_communes then communes}
+    <div class="small-map-container">
+        <Map communes={communes} 
+            colors={(code_commune) => colorScaleResults(differencePresidentielleLegislatives(code_commune))} />
+    </div>
+    {/await}
+</div>
+
+
+<DesistementsLegislatives
         {bureaux} />
-{/if}
 
-{/await}
 {/await}
 
 
@@ -263,9 +327,30 @@
     font-size: 12px;
 }
 
-.geo-select {
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#map-navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#geo-select {
     padding: 20px;
 }
+
+
+.small-map-container {
+    width: 250px;
+    height: 250px;
+}
+
+
 </style>
 <!--
 			

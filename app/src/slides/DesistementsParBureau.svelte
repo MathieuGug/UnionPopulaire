@@ -23,7 +23,7 @@
             let score_pres = $presidentielle_2017_bureau.get(id_b_vote).get($correspondance_leg_pres[$display_score]).total_voix;
             let score_leg = $legislatives_2017_bureau.get(id_b_vote).get($display_score).total_voix;
 
-            return score_pres - score_leg;
+            return score_leg - score_pres;
       }
     }
     
@@ -45,7 +45,7 @@
     <table>
         <thead>
           <tr>
-            <th>Bureau</th>
+            <th on:click={() => console.log('pouet')}>Bureau</th>
             <th>Ville</th> 
             <th>Code Postal</th> 
             <th>Adresse</th> 
@@ -55,8 +55,8 @@
             <th>Votes (P2017)</th> 
             <th>Votes (L2017)</th> 
 
-            <th>Pertes de voix</th> 
-            <th>% de votants perdus</th>
+            <th>Gain de voix</th> 
+            <th>% de votants gagnés</th>
           </tr>
         </thead>
         <tbody>
@@ -76,7 +76,7 @@
 
             <td>{differencePresidentielleLegislativesBureau(bureau.id_b_vote)}</td>
 
-            <td>{Math.round(100*(1 -
+            <td>{-Math.round(100*(1 -
               $legislatives_2017_bureau.get(bureau.id_b_vote).get($display_score).total_voix / 
               $presidentielle_2017_bureau.get(bureau.id_b_vote).get($correspondance_leg_pres[$display_score]).total_voix), 2)}%</td>
             
