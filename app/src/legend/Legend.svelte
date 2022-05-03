@@ -1,10 +1,17 @@
 <script>
     import { getContext, setContext } from "svelte";
-    import { sum } from 'd3-array';
-    import LegendGroup from './LegendGroup.svelte';
+    import { sum } from 'd3-array';    
+    import { scaleLinear } from 'd3-scale';
     
     export let resultats_election, candidats, groupes_politiques;
     export let group_size;
+
+    let width;
+    $: console.log(width);
+
+    $: xScale = scaleLinear()
+        .domain([0, 1])
+        .range([0, width/3]);
 
     // CP de la commune survolée
     let hovered_selection = getContext('commune-hovered');
@@ -65,17 +72,67 @@
     }
 </script>
 
+<table bind:clientWidth={width} >
+    <tbody>
+        <tr>
+            <td class="candidat-col">INSCRITS</td>
+            <td class="total-voix-col">{total_inscrits}</td>
+            <td class="pourcentage-inscrits-col"></td>
+            <td class="svg-col"></td>
+        </tr>
+    </tbody>
+
+    {#each [...Object.keys(groupes_politiques)] as groupe, k}
+        <tbody style="height: {group_size[k]}px;">
+        {#each groupes_politiques[groupe] as candidat, i}
+        <tr>
+            <td class="candidat-col">{candidat}</td>
+            <td class="total-voix-col">{candidats[candidat].total_voix}</td>
+            {#if candidats[candidat].total_voix != 0}
+            <td class="pourcentage-inscrits-col">{Math.round(candidats[candidat].total_voix / total_inscrits * 1000)/10}%</td>
+            {/if}
+            <td class="svg-col"><svg width="100" height="20"><rect x=0 y=0 width={xScale(candidats[candidat].total_voix / total_inscrits)} height="20" fill={candidats[candidat].color} /></svg></td>
+        </tr>
+        {/each}
+
+        </tbody>
+    {/each}
+</table>
+
+<style>
+tbody {
+    display: flex;
+    flex-direction: column;
+}
+
+tbody td.candidat-col{
+  width: 100px;
+}
+
+tbody td.total-voix-col{
+  width: 60px;
+}
+
+tbody td.pourcentage-inscrits-col{
+  width: 50px;
+}
+
+tbody td.svg-col{
+  width: 50px;
+}
+
+</style>
+<!--
 <svg height="550px" width="450px">
     <g transform="translate(0, 20)">
         <g class="total" transform="translate(10, 0)">
             <text>INSCRITS</text>
-            <text transform="translate(200, 0)">{total_inscrits}</text>
+            <text transform="translate(200, 0)"></text>
         </g>
 
         
-        {#each [...Object.keys(groupes_politiques)] as groupe, k}
-            <LegendGroup {candidats} {groupes_politiques} {groupe} {total_inscrits} transform="translate(10, {30 + group_size[k]})"/>
-        {/each}
+        
         
     </g>
 </svg>
+-->

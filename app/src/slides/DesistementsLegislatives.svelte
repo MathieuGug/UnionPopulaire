@@ -9,9 +9,7 @@
     
     export let bureaux;
 
-    let group_size_pres_2017 = [0, 80, 110, 150, 290, 350];
-    let group_size_pres_2022 = [0, 80, 110, 150, 290, 370];
-	let group_size_leg_2017 = [0, 80, 110, 150, 290, 350];
+    let group_size = [100, 30, 40, 180, 110, 90];
 
     let display_score = getContext("display-score");
 
@@ -79,7 +77,7 @@
         <div class="resultats">
             <p>Présidentielle 2017</p>
             <Legend 
-                group_size={group_size_pres_2017} 
+                group_size={group_size} 
                 candidats={candidats_pres_2017}
                 groupes_politiques={groupes_politiques_pres_2017}
                 resultats_election={$presidentielle_2017_cp} />
@@ -88,7 +86,7 @@
         <div class="resultats">
             <p>Législatives 2017</p>
             <Legend 
-                group_size={group_size_leg_2017} 
+                group_size={group_size} 
                 candidats={$candidats_leg_2017}
                 groupes_politiques={$groupes_politiques_leg_2017}
                 resultats_election={$legislatives_2017_cp} />
@@ -97,7 +95,7 @@
         <div class="resultats">
             <p>Présidentielle 2022</p>
             <Legend 
-                group_size={group_size_pres_2022} 
+                group_size={group_size} 
                 candidats={candidats_pres_2022}
                 groupes_politiques={groupes_politiques_pres_2022}
                 resultats_election={$presidentielle_2022_cp} />
@@ -123,6 +121,7 @@
     display: flex;
     flex-direction: row;
     height: auto;
+    justify-content: space-between;
 }
 
 .resultats {
