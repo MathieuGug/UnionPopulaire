@@ -120,6 +120,7 @@
 #resultats-container {
     display: flex;
     flex-direction: row;
+    align-items: center;
     height: auto;
     justify-content: space-between;
 }
@@ -138,6 +139,7 @@
     #resultats-container {
         display: flex;
         flex-direction: column;
+        align-items: center;
     }
 }
 </style>
