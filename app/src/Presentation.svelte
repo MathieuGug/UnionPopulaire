@@ -285,22 +285,19 @@
             </select>
         </div>
 
-        <div id="map-widgets">
-            <div class="candidat-selection">
-                <select bind:value={$display_score}>
-                    <option value="" selected>--choisissez un candidat--</option>
-                    {#each Object.keys($correspondance_leg_pres) as candidat}
-                        <option value={candidat} >{$candidats_leg_2017[candidat].nom} - {$candidats_leg_2017[candidat].nuance}</option>
-                    {/each}
+        <div id="candidat-selection">
+            <select bind:value={$display_score}>
+                <option value="" selected>--choisissez un candidat--</option>
+                {#each Object.keys($correspondance_leg_pres) as candidat}
+                    <option value={candidat} >{$candidats_leg_2017[candidat].nom} - {$candidats_leg_2017[candidat].nuance}</option>
+                {/each}
 
-                </select>
+            </select>
 
-                <button on:click={() => $selection = $codes_communes}>Tout sélectionner</button>
-                <button on:click={() => $selection = []}>Tout désélectionner</button>
-            </div>
-
-            
+            <button on:click={() => $selection = $codes_communes}>Tout sélectionner</button>
+            <button on:click={() => $selection = []}>Tout désélectionner</button>
         </div>
+
     </div>
 
 
@@ -337,13 +334,29 @@
 #map-navigation {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+
 }
 
 #geo-select {
+    display: flex;
+    flex-direction: column;
     padding: 20px;
 }
 
+#geo-select option {
+    width: 150px;
+}
+
+#candidat-selection {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#candidat-selection option {
+    width: 150px;
+}
 
 .small-map-container {
     width: 250px;
