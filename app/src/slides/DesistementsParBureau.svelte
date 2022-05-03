@@ -17,12 +17,16 @@
         .sort((a, b) => a.code_commune - b.code_commune || a.code_bureau - b.code_bureau)
     );
 
-    function differencePresidentielleLegislativesBureau (id_b_vote) {
+    let differencePresidentielleLegislativesBureau;
+    $: {
+      differencePresidentielleLegislativesBureau = function (id_b_vote) {
             let score_pres = $presidentielle_2017_bureau.get(id_b_vote).get($correspondance_leg_pres[$display_score]).total_voix;
             let score_leg = $legislatives_2017_bureau.get(id_b_vote).get($display_score).total_voix;
 
             return score_pres - score_leg;
+      }
     }
+    
 
     $: {
       console.log("LES BUREAUX DE VOTE:");
