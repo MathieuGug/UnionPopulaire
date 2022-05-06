@@ -33,7 +33,7 @@
 
     // Les départements en région PACA
     let dpt_paca = [
-        // {code_dpt: 4, nom_dpt: "Alpes de Hautes-Provences"},
+        {code_dpt: 4, nom_dpt: "Alpes de Hautes-Provences"},
         // {code_dpt: 5, nom_dpt: "Hautes-Alpes"},
         // {code_dpt: 6, nom_dpt: "Alpes-Maritimes"},
         // {code_dpt: 13, nom_dpt: "Bouches-du-Rhône"},
