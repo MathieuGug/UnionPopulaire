@@ -16,7 +16,8 @@
 	const paths = {
 		pres_2017: 'data/2017_pres_PACA_BV.csv',
 		leg_2017: 'data/2017_leg_PACA_BV.csv',
-		pres_2022: 'data/2022_pres_PACA_BV.csv'
+		pres_2022: 'data/2022_pres_PACA_BV.csv',
+		leg_2022: 'data/2022_leg_PACA_BV.csv'
 	}
 
 	///////////////////////////////////////////////
@@ -36,6 +37,7 @@
     let pres_2017 = loadResults(paths.pres_2017);
     let leg_2017 = loadResults(paths.leg_2017);
     let pres_2022 = loadResults(paths.pres_2022);
+	let leg_2022 = loadResults(paths.leg_2022)
 
 </script>
 
@@ -47,15 +49,18 @@
 {#await pres_2017 then resultats_presidentielles_2017}
 {#await leg_2017 then resultats_legislatives_2017}
 {#await pres_2022 then resultats_presidentielles_2022}
+{#await leg_2022 then resultats_legislatives_2022}
 
 
 <div class="app">
 	<Presentation
 		{resultats_presidentielles_2017}
 		{resultats_legislatives_2017}
-		{resultats_presidentielles_2022} />
+		{resultats_presidentielles_2022}
+		{resultats_legislatives_2022} />
 </div>
 
+{/await}
 {/await}
 {/await}
 {/await}

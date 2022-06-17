@@ -6,15 +6,15 @@ import { rollup, sum } from 'd3-array';
 
 function colorParNuance(nuance) {
     let color;
-    if (nuance == "REM") {
+    if (nuance == "ENS" || nuance == "REM") {
         color = "#EFCB68";
-    } else if (nuance == "FI") {
+    } else if (nuance == "FI" || nuance == "NUP") {
         color = '#5F0A87';
     } else if (nuance == "ECO") {
         color = '#ADD6A7';
     } else if (nuance == "LR") {
         color = '#7AA2DF';
-    } else if (nuance == "FN") {
+    } else if (nuance == "FN" || nuance == "RN") {
         color = '#1B2CC1';
     } else if (nuance == "COM") {
         color = '#CE6C47';
@@ -71,14 +71,23 @@ export function getGroupesPolitiques(type, candidats) {
             extreme_droite: ['LE PEN', 'ZEMMOUR', 'DUPONT-AIGNAN'],
             autre: ['LASSALLE']
         }
+    } else if (type == "leg_2022") {
+        groupes_politiques = {
+            non_candidat: ['abstention', 'blancs', 'nuls'],
+            macron: ['ENS'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+            droite: ['LR'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+            gauche: ['NUP', 'FI', 'PS', 'ECO', 'DVG'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+            extreme_droite: ['RN', 'REC'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+            autre: ['DIV', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined)
+        }
     } else {
         groupes_politiques = {
             non_candidat: ['abstention', 'blancs', 'nuls'],
             macron: ['REM'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
             droite: ['LR'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
-            gauche: ['FI', 'RDG', 'ECO', 'EXG'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
+            gauche: ['FI', 'RDG', 'ECO',  'DVG', 'EXG'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
             extreme_droite: ['FN', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined),
-            autre: ['DVG', 'DIV', 'DVD'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined)
+            autre: ['DIV'].map( nuance => candidatParNuance(nuance, candidats) ).filter(e => e !== undefined)
         }
     }
     return groupes_politiques;

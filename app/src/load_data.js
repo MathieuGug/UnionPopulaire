@@ -67,3 +67,39 @@ export async function loadBureaux(codes_communes) {
     }
     return features;
 }
+
+export async function loadCommunes(codes_communes) {
+    
+    var communes = await csv('./data/villes_france.csv');
+    var communes_geojson = [];
+    console.log(codes_communes);
+    for (let commune of communes) {
+        if (codes_communes.includes(commune.code_insee) ) {
+            console.log(commune);
+
+            communes_geojson.push(
+            {  
+                "type": "Feature", 
+                "properties": {
+                    id: commune.id,
+                    departement: +commune.departement,
+                    slug: commune.slug,
+                    nom: commune.nom,
+                    nom_simple: commune.nom_simple,
+                    nom_reel: commune.nom_reel,
+                    code_postal: commune.code_postal,
+                    numero_commune: commune.numero_commune,
+                    code_insee: commune.code_insee,
+                    arrondissement: commune.arrondissement
+                }, 
+                "geometry": {
+                    "type": "Point", 
+                    "coordinates": [commune.longitude_deg, commune.latitude_deg] 
+                }
+            })
+        }
+
+    }
+
+    return { type: "FeatureCollection", name: "Ville de France", features: communes_geojson};
+}

@@ -28,15 +28,20 @@
     let legislatives_2017_cp = getContext('legislatives-2017-cp');
     let legislatives_2017_bureau = getContext('legislatives-2017-bureau');
 
+    let legislatives_2022 = getContext('legislatives-2022');
+    let legislatives_2022_cp = getContext('legislatives-2022-cp');
+    let legislatives_2022_bureau = getContext('legislatives-2022-bureau');
+
     // Les candidats et les groupes politiques auxquels il appartiennent
     let candidats_leg_2017 = getContext('candidats-legislatives-2017');
     let candidats_pres_2017 = getContext('candidats-presidentielle-2017');
     let candidats_pres_2022 = getContext('candidats-presidentielle-2022');
+    let candidats_leg_2022 = getContext('candidats-legislatives-2022');
 
     let groupes_politiques_pres_2017 = getContext('groupes-politiques-presidentielles-2017');
     let groupes_politiques_pres_2022 = getContext('groupes-politiques-presidentielles-2022');
     let groupes_politiques_leg_2017 = getContext('groupes-politiques-legislatives-2017');
-    
+    let groupes_politiques_leg_2022 = getContext('groupes-politiques-legislatives-2022');
 
     //////////////////////////////////////////////
     //          CHECK SI TOUT VA BIEN           //
@@ -99,6 +104,15 @@
                 candidats={candidats_pres_2022}
                 groupes_politiques={groupes_politiques_pres_2022}
                 resultats_election={$presidentielle_2022_cp} />
+        </div>
+
+        <div class="resultats">
+            <p>Législatives 2022</p>
+            <Legend 
+            group_size={group_size} 
+            candidats={$candidats_leg_2022}
+            groupes_politiques={$groupes_politiques_leg_2022}
+            resultats_election={$legislatives_2022_cp} />
         </div>
 
     </div>

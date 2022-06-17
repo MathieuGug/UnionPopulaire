@@ -86,10 +86,16 @@
         <tbody style="height: {group_size[k]}px;">
         {#each groupes_politiques[groupe] as candidat, i}
         <tr>
+            <td class="nuance-col">{candidats[candidat].nuance}</td>
             <td class="candidat-col">{candidat}</td>
             <td class="total-voix-col">{candidats[candidat].total_voix}</td>
             {#if candidats[candidat].total_voix != 0}
             <td class="pourcentage-inscrits-col">{Math.round(candidats[candidat].total_voix / total_inscrits * 1000)/10}%</td>
+            {#if !(['abstention', 'blancs', 'nuls'].includes(candidat))}
+            <td class="pourcentage-exprimes-col">{Math.round(candidats[candidat].total_voix / (total_inscrits - candidats['abstention'].total_voix - candidats['nuls'].total_voix - candidats['blancs'].total_voix)*1000)/10}%</td>
+            {:else}
+            <td class="pourcentage-exprimes-col"> </td>
+            {/if}
             {/if}
             <td class="svg-col"><svg width="100" height="20"><rect x=0 y=0 width={xScale(candidats[candidat].total_voix / total_inscrits)} height="20" fill={candidats[candidat].color} /></svg></td>
         </tr>
@@ -105,6 +111,10 @@ tbody {
     flex-direction: column;
 }
 
+tbody td.nuance-col {
+    font-size: 8px;
+    width: 30px;
+}
 tbody td.candidat-col{
   width: 100px;
 }
@@ -114,6 +124,11 @@ tbody td.total-voix-col{
 }
 
 tbody td.pourcentage-inscrits-col{
+  width: 50px;
+}
+
+
+tbody td.pourcentage-exprimes-col{
   width: 50px;
 }
 

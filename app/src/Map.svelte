@@ -6,13 +6,14 @@
 
     import { geoMercator } from 'd3-geo';
 
-    export let communes, colors;
+    export let communes, communes_coordinates, colors;
 
     // Bind la sélection de la carte
     let selection_active = getContext('communes-actives');
     let hovered_selection = getContext('commune-hovered');
 
 	let textElement;
+    console.log(communes_coordinates);
 
 	$: textBoxWidth = textElement ? textElement.getComputedTextLength()+10 : 0;
 </script>
@@ -47,6 +48,8 @@
     </text>
     
     </FeatureLayer>
+
+    <FeatureLayer geojson={communes_coordinates} />
 </BaseMap>
 
 
